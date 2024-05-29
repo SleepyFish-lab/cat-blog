@@ -1,175 +1,145 @@
-package com.interesting.servcice;
+package com.interesting.service;
 
-import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * Redis服务接口实现类
+ *
+ * @author ican
+ */
 @Service
+@SuppressWarnings("all")
 public class RedisService {
 
     @Resource
-    public RedisTemplate<String, Object> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
-    /**
-     * @param key
-     * @param timeout
-     * @param timeUnit
-     * @return
-     */
+
     public Boolean setExpire(String key, long timeout, TimeUnit timeUnit) {
         return redisTemplate.expire(key, timeout, timeUnit);
     }
 
-    /**
-     * @param key
-     * @param timeUnit
-     * @return
-     */
+
     public Long getExpire(String key, TimeUnit timeUnit) {
         return redisTemplate.getExpire(key, timeUnit);
     }
 
-    /**
-     * @param pattern
-     * @return
-     */
+
     public Collection<String> getKeys(String pattern) {
         return redisTemplate.keys(pattern);
     }
 
-    /**
-     * @param key
-     * @return
-     */
+
     public Boolean hasKey(String key) {
         return redisTemplate.hasKey(key);
     }
 
-    /**
-     * @param key
-     * @param value
-     * @param <T>
-     */
+
     public <T> void setObject(String key, T value) {
         redisTemplate.opsForValue().set(key, value);
     }
 
-    /**
-     * @param key
-     * @param value
-     * @param timeout
-     * @param timeUnit
-     * @param <T>
-     */
+
     public <T> void setObject(String key, T value, long timeout, TimeUnit timeUnit) {
         redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
     }
 
-    /**
-     * @param key
-     * @param <T>
-     * @return
-     */
+
     public <T> T getObject(String key) {
         return (T) redisTemplate.opsForValue().get(key);
     }
 
-    /**
-     * @param key
-     * @return
-     */
+
     public Boolean deleteObject(String key) {
         return redisTemplate.delete(key);
     }
 
-    /**
-     * @param keys
-     * @return
-     */
+
     public Long deleteObject(List<String> keys) {
         return redisTemplate.delete(keys);
     }
 
-    /**
-     * @param key
-     * @param delta
-     * @return
-     */
+
     public Long incr(String key, long delta) {
         return redisTemplate.opsForValue().increment(key, delta);
     }
 
-    /**
-     * @param key
-     * @param delta
-     * @return
-     */
+
     public Long decr(String key, long delta) {
         return redisTemplate.opsForValue().decrement(key, -delta);
     }
 
-    /**
-     * @param key
-     * @param hashKey
-     * @param value
-     * @param <T>
-     */
+
     public <T> void setHash(String key, String hashKey, T value) {
         redisTemplate.opsForHash().put(key, hashKey, value);
     }
+
 
     public <T> Boolean setHash(String key, String hashKey, T value, long timeout, TimeUnit timeUnit) {
         redisTemplate.opsForHash().put(key, hashKey, value);
         return setExpire(key, timeout, timeUnit);
     }
 
+
     public <T> void setHashAll(String key, Map<String, T> map) {
         redisTemplate.opsForHash().putAll(key, map);
     }
+
 
     public <T> Boolean setHashAll(String key, Map<String, T> map, long timeout, TimeUnit timeUnit) {
         redisTemplate.opsForHash().putAll(key, map);
         return setExpire(key, timeout, timeUnit);
     }
 
+
     public <T> T getHash(String key, String hashKey) {
         return (T) redisTemplate.opsForHash().get(key, hashKey);
     }
+
 
     public Map getHashAll(String key) {
         return redisTemplate.opsForHash().entries(key);
     }
 
+
     public <T> void deleteHash(String key, T... hashKeys) {
         redisTemplate.opsForHash().delete(key, hashKeys);
     }
+
 
     public Boolean hasHashValue(String key, String hashKey) {
         return redisTemplate.opsForHash().hasKey(key, hashKey);
     }
 
+
     public Long incrHash(String key, String hashKey, Long delta) {
         return redisTemplate.opsForHash().increment(key, hashKey, delta);
     }
+
 
     public Long decrHash(String key, String hashKey, Long delta) {
         return redisTemplate.opsForHash().increment(key, hashKey, -delta);
     }
 
+
     public <T> Long setList(String key, T value) {
         return redisTemplate.opsForList().rightPush(key, value);
     }
+
 
     public <T> Long setList(String key, T value, long timeout, TimeUnit timeUnit) {
         Long count = redisTemplate.opsForList().rightPush(key, value);
         setExpire(key, timeout, timeUnit);
         return count;
     }
+
 
     public <T> Long setListAll(String key, T... values) {
         return redisTemplate.opsForList().rightPushAll(key, values);
@@ -269,4 +239,6 @@ public class RedisService {
                 .stream()
                 .collect(Collectors.toMap(ZSetOperations.TypedTuple::getValue, ZSetOperations.TypedTuple::getScore));
     }
+
+
 }
